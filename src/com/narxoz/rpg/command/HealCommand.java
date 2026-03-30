@@ -22,7 +22,7 @@ public class HealCommand implements ActionCommand {
         }
         if(target.getHealPotions() <= 0){
             actualHealApplied = 0;
-            System.out.println("[Heal] No potions left for \" + target.getName() + \".");
+            System.out.println("[Heal] No potions left for " + target.getName());
             return;
         }
         int before = target.getHealth();
