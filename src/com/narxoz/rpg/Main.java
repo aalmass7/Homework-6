@@ -29,7 +29,6 @@ public class Main {
 
         ActionQueue queue = new ActionQueue();
 
-        // Enqueue three hero actions.
         queue.enqueue(new AttackCommand(opponent, hero.getAttackPower()));
         queue.enqueue(new HealCommand(hero, 20));
         queue.enqueue(new DefendCommand(hero, 0.15));
