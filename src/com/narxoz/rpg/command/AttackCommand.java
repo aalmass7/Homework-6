@@ -2,32 +2,41 @@ package com.narxoz.rpg.command;
 
 import com.narxoz.rpg.arena.ArenaOpponent;
 
+import java.util.Objects;
+
 public class AttackCommand implements ActionCommand {
     private final ArenaOpponent target;
     private final int attackPower;
     private int damageDealt;
 
     public AttackCommand(ArenaOpponent target, int attackPower) {
-        this.target = target;
-        this.attackPower = attackPower;
+        this.target = Objects.requireNonNull(target, "target");
+        this.attackPower = Math.max(0, attackPower);
     }
 
     @Override
     public void execute() {
-        // TODO: Deal attackPower damage to the target using target.takeDamage(int).
-        // TODO: Store the actual damage dealt in damageDealt so that undo() can reverse it exactly.
-        // TODO: Consider: should damageDealt be capped at the target's remaining health?
+        int before = target.getHealth();
+        target.takeDamage(attackPower);
+        int after = target.getHealth();
+        damageDealt = Math.max(0, before - after);
+
+        System.out.println("[Attack] Dealt " + damageDealt + " damage to " + target.getName()
+                + ". Opponent HP=" + target.getHealth());
     }
 
     @Override
     public void undo() {
-        // TODO: Restore the stored damageDealt to the target using target.restoreHealth(int).
-        // Note: Use damageDealt (what was actually applied), not attackPower.
+        if(damageDealt <= 0){
+            return;
+        }
+        target.restoreHealth(damageDealt);
+        System.out.println("[Attack:undo] Restored " + damageDealt + " HP to " + target.getName()
+                + ". Opponent HP=" + target.getHealth());
     }
 
     @Override
     public String getDescription() {
-        // TODO: Return a readable summary, e.g. "Attack for 18 damage".
-        return "TODO";
+        return "Attack for " + attackPower + " damage";
     }
 }
