@@ -2,34 +2,50 @@ package com.narxoz.rpg.command;
 
 import com.narxoz.rpg.arena.ArenaFighter;
 
+import java.util.Objects;
+
 public class HealCommand implements ActionCommand {
     private final ArenaFighter target;
     private final int healAmount;
     private int actualHealApplied;
 
     public HealCommand(ArenaFighter target, int healAmount) {
-        this.target = target;
-        this.healAmount = healAmount;
+        this.target = Objects.requireNonNull(target, "target");
+        this.healAmount = Math.max(0, healAmount);
     }
 
     @Override
     public void execute() {
-        // TODO: Check whether the target has heal potions remaining before healing.
-        // TODO: Heal the target by healAmount using target.heal(int).
-        // TODO: Store how much was actually applied in actualHealApplied (for undo).
-        // Hint: actual heal may be less than healAmount if target is near max health.
+        if(healAmount <= 0){
+            actualHealApplied = 0;
+            return;
+        }
+        if(target.getHealPotions() <= 0){
+            actualHealApplied = 0;
+            System.out.println("[Heal] No potions left for \" + target.getName() + \".");
+            return;
+        }
+        int before = target.getHealth();
+        target.heal(healAmount);
+        int after = target.getHealth();
+        actualHealApplied = Math.max(0, after - before);
+
+        System.out.println("[Heal] Healed " + target.getName() + " for " + actualHealApplied
+                + " HP. HP=" + target.getHealth() + ", potions=" + target.getHealPotions());
     }
 
     @Override
     public void undo() {
-        // TODO: Remove the heal that was applied.
-        // Note: Use actualHealApplied (what was actually gained), not healAmount.
-        // Hint: call target.takeDamage(actualHealApplied) to reverse the heal.
+        if(actualHealApplied <= 0){
+            return;
+        }
+        target.takeDamage(actualHealApplied);
+        System.out.println("[Heal:undo] Removed " + actualHealApplied + " HP from " + target.getName()
+                + ". HP=" + target.getHealth());
     }
 
     @Override
     public String getDescription() {
-        // TODO: Return a readable summary, e.g. "Heal for 20 HP".
-        return "TODO";
+        return "Heal for " + healAmount + " HP";
     }
 }
